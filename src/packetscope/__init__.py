@@ -1,3 +1,5 @@
 """PacketScope public API."""
-from .core import summarize
-__all__=["summarize"]
+
+from .core import Finding, analyze, summarize
+
+__all__ = ["Finding", "analyze", "summarize"]
