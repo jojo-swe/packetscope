@@ -1,0 +1,9 @@
+{
+  "flows": [
+    {"src":"10.0.10.25","dst":"203.0.113.10","protocol":"tcp","packets":1000,"bytes":900000,"retransmissions":65,"action":"allow"},
+    {"src":"203.0.113.10","dst":"10.0.10.25","protocol":"tcp","packets":120,"bytes":18000,"retransmissions":2,"action":"allow"},
+    {"src":"10.0.10.25","dst":"10.0.0.53","protocol":"dns","dst_port":53,"queries":100,"dns_failures":24,"packets":100,"bytes":12000,"action":"allow"},
+    {"src":"10.0.20.99","dst":"10.0.0.10","protocol":"tcp","packets":10,"bytes":2000,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.11","protocol":"tcp","packets":10,"bytes":2000,"retransmissions":0,"action":"deny"}
+  ]
+}
