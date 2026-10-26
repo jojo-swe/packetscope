@@ -64,8 +64,13 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
         findings.append(Finding(
             "tcp_retransmissions", "high" if ratio >= 0.05 else "medium",
             "Elevated TCP retransmissions",
-            {"retransmissions": int(retransmissions), "tcp_packets": int(tcp_packets), "ratio": round(ratio, 4)},
-            "Inspect loss, duplex, MTU, congestion, and overloaded endpoints along the affected path.",
+            {
+                "retransmissions": int(retransmissions),
+                "tcp_packets": int(tcp_packets),
+                "ratio": round(ratio, 4),
+            },
+            "Inspect loss, duplex, MTU, congestion, and overloaded endpoints along the affected "
+            "path.",
         ))
 
     if dns_queries and dns_failures / dns_queries >= 0.05:
@@ -74,7 +79,8 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
             "dns_failures", "high" if ratio >= 0.2 else "medium",
             "Elevated DNS failure rate",
             {"queries": int(dns_queries), "failures": int(dns_failures), "ratio": round(ratio, 4)},
-            "Check resolver reachability, SERVFAIL/NXDOMAIN sources, forwarding rules, and upstream latency.",
+            "Check resolver reachability, SERVFAIL/NXDOMAIN sources, forwarding rules, and "
+            "upstream latency.",
         ))
 
     for (a, b), (forward, reverse) in pair_directions.items():
@@ -87,24 +93,39 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
             findings.append(Finding(
                 "traffic_asymmetry", "medium",
                 f"Strong traffic asymmetry between {a} and {b}",
-                {"endpoint_a": a, "endpoint_b": b, "bytes_a_to_b": int(forward), "bytes_b_to_a": int(reverse)},
-                "Verify expected application behaviour, return routing, stateful firewall paths, and packet capture placement.",
+                {
+                    "endpoint_a": a,
+                    "endpoint_b": b,
+                    "bytes_a_to_b": int(forward),
+                    "bytes_b_to_a": int(reverse),
+                },
+                "Verify expected application behaviour, return routing, stateful firewall paths, "
+                "and packet capture placement.",
             ))
 
     if flows and denied / len(flows) >= 0.1:
         findings.append(Finding(
             "high_deny_rate", "medium",
             "High proportion of denied flows",
-            {"denied_flows": denied, "flow_count": len(flows), "ratio": round(denied / len(flows), 4)},
-            "Group denies by source, destination and port to distinguish policy mistakes from scans or unwanted traffic.",
+            {
+                "denied_flows": denied,
+                "flow_count": len(flows),
+                "ratio": round(denied / len(flows), 4),
+            },
+            "Group denies by source, destination and port to distinguish policy mistakes from "
+            "scans or unwanted traffic.",
         ))
 
     findings.sort(key=lambda item: (-_SEVERITY[item.severity], item.code, item.title))
-    highest = max((finding.severity for finding in findings), key=lambda value: _SEVERITY[value], default="info")
+    highest = max(
+        (finding.severity for finding in findings), key=_SEVERITY.__getitem__, default="info"
+    )
     return {
         "flow_count": len(flows),
         "protocols": dict(sorted(protocols.items())),
-        "top_talkers": [{"source": src, "bytes": count} for src, count in talker_bytes.most_common(5)],
+        "top_talkers": [
+            {"source": src, "bytes": count} for src, count in talker_bytes.most_common(5)
+        ],
         "highest_severity": highest,
         "findings": [finding.to_dict() for finding in findings],
     }

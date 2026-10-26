@@ -36,14 +36,17 @@ def render(report: dict[str, Any]) -> str:
     else:
         lines.append("Findings:")
         for finding in report["findings"]:
-            lines.append(f"  [{finding['severity'].upper()}] {finding['title']} ({finding['code']})")
+            severity = finding["severity"].upper()
+            lines.append(f"  [{severity}] {finding['title']} ({finding['code']})")
             lines.append(f"    Evidence: {json.dumps(finding['evidence'], sort_keys=True)}")
             lines.append(f"    Action: {finding['recommendation']}")
     return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Explain packet and flow anomalies from JSON records")
+    parser = argparse.ArgumentParser(
+        description="Explain packet and flow anomalies from JSON records"
+    )
     parser.add_argument("input", type=Path)
     parser.add_argument("--json", action="store_true", dest="json_output")
     parser.add_argument("--fail-on", choices=tuple(_LEVEL), default="high")
