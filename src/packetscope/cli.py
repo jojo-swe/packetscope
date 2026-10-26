@@ -2,22 +2,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 from .core import _SEVERITY, analyze
 
 
-def load_records(path: Path) -> list[dict[str, Any]]:
-    text = path.read_text(encoding="utf-8")
-    if path.suffix.lower() in {".ndjson", ".jsonl"}:
-        return [json.loads(line) for line in text.splitlines() if line.strip()]
-    payload = json.loads(text)
-    if isinstance(payload, list):
-        return payload
-    if isinstance(payload, dict) and isinstance(payload.get("flows"), list):
-        return payload["flows"]
-    raise ValueError("input must be a JSON array, {'flows': [...]}, JSONL, or NDJSON")
+def load_records(source: str) -> list[dict[str, Any]]:
+    text = sys.stdin.read() if source == "-" else Path(source).read_text(encoding="utf-8")
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        payload = [json.loads(line) for line in text.splitlines() if line.strip()]
+    if isinstance(payload, dict):
+        # A lone object is single-record NDJSON unless it wraps {"flows": [...]}.
+        payload = payload["flows"] if isinstance(payload.get("flows"), list) else [payload]
+    if not isinstance(payload, list):
+        raise ValueError("input must be a JSON array, {'flows': [...]}, JSONL, or NDJSON")
+    if not all(isinstance(record, dict) for record in payload):
+        raise ValueError("flow records must be JSON objects")
+    return payload
 
 
 def render(report: dict[str, Any]) -> str:
@@ -45,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Explain packet and flow anomalies from JSON records"
     )
-    parser.add_argument("input", type=Path)
+    parser.add_argument("input", help="flow file, or - to read from stdin")
     parser.add_argument("--json", action="store_true", dest="json_output")
     parser.add_argument("--fail-on", choices=tuple(_SEVERITY), default="high")
     args = parser.parse_args(argv)
