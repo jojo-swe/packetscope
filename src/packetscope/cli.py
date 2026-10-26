@@ -5,9 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .core import analyze
-
-_LEVEL = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+from .core import _SEVERITY, analyze
 
 
 def load_records(path: Path) -> list[dict[str, Any]]:
@@ -49,17 +47,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("input", type=Path)
     parser.add_argument("--json", action="store_true", dest="json_output")
-    parser.add_argument("--fail-on", choices=tuple(_LEVEL), default="high")
+    parser.add_argument("--fail-on", choices=tuple(_SEVERITY), default="high")
     args = parser.parse_args(argv)
 
     try:
         report = analyze(load_records(args.input))
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         parser.error(str(exc))
-        return 2
 
     print(json.dumps(report, indent=2, sort_keys=True) if args.json_output else render(report))
-    return int(_LEVEL[report["highest_severity"]] >= _LEVEL[args.fail_on])
+    return int(_SEVERITY[report["highest_severity"]] >= _SEVERITY[args.fail_on])
 
 
 if __name__ == "__main__":

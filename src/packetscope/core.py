@@ -129,7 +129,3 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
         "highest_severity": highest,
         "findings": [finding.to_dict() for finding in findings],
     }
-
-
-def summarize(flows: list[dict[str, Any]]) -> dict[str, Any]:
-    return analyze(flows)

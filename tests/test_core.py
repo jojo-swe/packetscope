@@ -1,8 +1,8 @@
-from packetscope import summarize
+from packetscope import analyze
 
 
 def test_summary_counts_protocols_and_talkers() -> None:
-    result = summarize([
+    result = analyze([
         {"src": "10.0.0.1", "protocol": "tcp", "bytes": 100},
         {"src": "10.0.0.1", "protocol": "udp", "bytes": 100},
     ])
