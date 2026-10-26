@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 _SEVERITY = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+_FANOUT_MEDIUM = 10
+_FANOUT_HIGH = 50
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,8 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
     protocols = Counter(str(flow.get("protocol", "unknown")).lower() for flow in flows)
     talker_bytes: Counter[str] = Counter()
     pair_directions: dict[tuple[str, str], list[float]] = defaultdict(lambda: [0.0, 0.0])
+    denied_targets: dict[str, set[tuple[str, int]]] = defaultdict(set)
+    denied_by_source: Counter[str] = Counter()
     findings: list[Finding] = []
 
     retransmissions = 0.0
@@ -58,6 +62,8 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
             dns_failures += _number(flow, "dns_failures")
         if str(flow.get("action", "")).lower() in {"deny", "denied", "drop", "blocked"}:
             denied += 1
+            denied_by_source[src] += 1
+            denied_targets[src].add((dst, int(_number(flow, "dst_port"))))
 
     if tcp_packets and retransmissions / tcp_packets >= 0.02:
         ratio = retransmissions / tcp_packets
@@ -115,6 +121,21 @@ def analyze(flows: list[dict[str, Any]]) -> dict[str, Any]:
             "Group denies by source, destination and port to distinguish policy mistakes from "
             "scans or unwanted traffic.",
         ))
+
+    for src, targets in denied_targets.items():
+        fanout = len(targets)
+        if fanout >= _FANOUT_MEDIUM:
+            findings.append(Finding(
+                "deny_fanout", "high" if fanout >= _FANOUT_HIGH else "medium",
+                f"Denied connections from {src} fan out to {fanout} targets",
+                {
+                    "source": src,
+                    "distinct_targets": fanout,
+                    "denied_flows": denied_by_source[src],
+                },
+                "Treat as a probable scan or misconfigured client; check the source host and "
+                "block or rate-limit at the edge.",
+            ))
 
     findings.sort(key=lambda item: (-_SEVERITY[item.severity], item.code, item.title))
     highest = max(

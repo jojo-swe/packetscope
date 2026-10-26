@@ -4,6 +4,16 @@
     {"src":"203.0.113.10","dst":"10.0.10.25","protocol":"tcp","packets":120,"bytes":18000,"retransmissions":2,"action":"allow"},
     {"src":"10.0.10.25","dst":"10.0.0.53","protocol":"dns","dst_port":53,"queries":100,"dns_failures":24,"packets":100,"bytes":12000,"action":"allow"},
     {"src":"10.0.20.99","dst":"10.0.0.10","protocol":"tcp","packets":10,"bytes":2000,"retransmissions":0,"action":"deny"},
-    {"src":"10.0.20.99","dst":"10.0.0.11","protocol":"tcp","packets":10,"bytes":2000,"retransmissions":0,"action":"deny"}
+    {"src":"10.0.20.99","dst":"10.0.0.11","protocol":"tcp","packets":10,"bytes":2000,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.12","protocol":"tcp","dst_port":22,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.13","protocol":"tcp","dst_port":22,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.14","protocol":"tcp","dst_port":22,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.15","protocol":"tcp","dst_port":445,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.16","protocol":"tcp","dst_port":445,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.17","protocol":"tcp","dst_port":3389,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.18","protocol":"tcp","dst_port":3389,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.10","protocol":"tcp","dst_port":22,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.10","protocol":"tcp","dst_port":445,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"},
+    {"src":"10.0.20.99","dst":"10.0.0.11","protocol":"tcp","dst_port":3389,"packets":2,"bytes":120,"retransmissions":0,"action":"deny"}
   ]
 }
