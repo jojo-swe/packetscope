@@ -43,9 +43,9 @@ Flows: 15
 Highest severity: high
 Protocols: dns=1, tcp=14
 Top talkers:
-  10.0.10.25: 912000 bytes
+  10.x.x.x: 912000 bytes
   203.0.113.10: 18000 bytes
-  10.0.20.99: 5200 bytes
+  10.x.x.y: 5200 bytes
 Findings:
   [HIGH] Elevated DNS failure rate (dns_failures)
     Evidence: {"failures": 24, "queries": 100, "ratio": 0.24}
@@ -53,17 +53,17 @@ Findings:
   [HIGH] Elevated TCP retransmissions (tcp_retransmissions)
     Evidence: {"ratio": 0.0578, "retransmissions": 67, "tcp_packets": 1160}
     Action: Inspect loss, duplex, MTU, congestion, and overloaded endpoints along the affected path.
-  [MEDIUM] Denied connections from 10.0.20.99 fan out to 12 targets (deny_fanout)
-    Evidence: {"denied_flows": 12, "distinct_targets": 12, "source": "10.0.20.99"}
+  [MEDIUM] Denied connections from 10.x.x.y fan out to 12 targets (deny_fanout)
+    Evidence: {"denied_flows": 12, "distinct_targets": 12, "source": "10.x.x.y"}
     Action: Treat as a probable scan or misconfigured client; check the source host and block or rate-limit at the edge.
   [MEDIUM] High proportion of denied flows (high_deny_rate)
     Evidence: {"denied_flows": 12, "flow_count": 15, "ratio": 0.8}
     Action: Group denies by source, destination and port to distinguish policy mistakes from scans or unwanted traffic.
-  [MEDIUM] Strong traffic asymmetry between 10.0.0.53 and 10.0.10.25 (traffic_asymmetry)
-    Evidence: {"bytes_a_to_b": 0, "bytes_b_to_a": 12000, "endpoint_a": "10.0.0.53", "endpoint_b": "10.0.10.25"}
+  [MEDIUM] Strong traffic asymmetry between 10.x.x.z and 10.x.x.x (traffic_asymmetry)
+    Evidence: {"bytes_a_to_b": 0, "bytes_b_to_a": 12000, "endpoint_a": "10.x.x.z", "endpoint_b": "10.x.x.x"}
     Action: Verify expected application behaviour, return routing, stateful firewall paths, and packet capture placement.
-  [MEDIUM] Strong traffic asymmetry between 10.0.10.25 and 203.0.113.10 (traffic_asymmetry)
-    Evidence: {"bytes_a_to_b": 900000, "bytes_b_to_a": 18000, "endpoint_a": "10.0.10.25", "endpoint_b": "203.0.113.10"}
+  [MEDIUM] Strong traffic asymmetry between 10.x.x.x and 203.0.113.10 (traffic_asymmetry)
+    Evidence: {"bytes_a_to_b": 900000, "bytes_b_to_a": 18000, "endpoint_a": "10.x.x.x", "endpoint_b": "203.0.113.10"}
     Action: Verify expected application behaviour, return routing, stateful firewall paths, and packet capture placement.
 ```
 
@@ -87,7 +87,7 @@ packetscope examples/incident-flows.json --json --fail-on critical
   "flow_count": 15,
   "highest_severity": "high",
   "protocols": {"dns": 1, "tcp": 14},
-  "top_talkers": [{"bytes": 912000, "source": "10.0.10.25"}]
+  "top_talkers": [{"bytes": 912000, "source": "10.x.x.x"}]
 }
 ```
 
@@ -134,7 +134,7 @@ Numeric fields that are missing, `null`, or not numbers are treated as `0` witho
 
 ### Known limitations
 
-- **One-directional records look asymmetric.** Each record's `bytes` is counted in the `src → dst` direction only. A record whose reverse direction is absent therefore always triggers `traffic_asymmetry` once it exceeds 10 000 bytes; the DNS flow `10.0.10.25 → 10.0.0.53` in the bundled example is flagged for this reason. Sources that see both directions should emit one record per direction.
+- **One-directional records look asymmetric.** Each record's `bytes` is counted in the `src → dst` direction only. A record whose reverse direction is absent therefore always triggers `traffic_asymmetry` once it exceeds 10 000 bytes; the DNS flow `10.x.x.x → 10.x.x.z` in the bundled example is flagged for this reason. Sources that see both directions should emit one record per direction.
 - **No native Zeek or tshark field names.** Fields such as Zeek's `id.orig_h`, `id.resp_h`, `orig_bytes`, or `resp_bytes` are not recognised; rename them to the fields above first.
 
 ## Python API
@@ -145,7 +145,7 @@ Numeric fields that are missing, `null`, or not numbers are treated as `0` witho
 from packetscope import analyze
 
 report = analyze([
-    {"src": "10.0.0.10", "dst": "203.0.113.5", "protocol": "tcp", "packets": 1000, "retransmissions": 60}
+    {"src": "10.x.y.x", "dst": "203.0.113.5", "protocol": "tcp", "packets": 1000, "retransmissions": 60}
 ])
 print(report["findings"])
 ```
