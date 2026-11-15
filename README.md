@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/assets/logo.svg" alt="packetscope logo" width="128"></p>
+
 # PacketScope
 
 ![CI](https://github.com/jojo-swe/packetscope/actions/workflows/ci.yml/badge.svg)
